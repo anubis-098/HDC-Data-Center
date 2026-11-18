@@ -1,7 +1,9 @@
 import json
 import sqlite3
 import unittest
-from sync_core import validate_snapshot, apply_snapshot, CenterClient
+from io import BytesIO
+from types import SimpleNamespace
+from sync_core import validate_snapshot, apply_snapshot, CenterClient, STORE_GROUPS, MAX_STORE_SNAPSHOT_BYTES
 
 
 class Connection:
@@ -22,6 +24,16 @@ class Connection:
 
 
 class StoreSyncTests(unittest.TestCase):
+    def test_full_valid_dataset_fits_the_response_limit(self):
+        links = [{'group': group, 'category': category} for group, categories in STORE_GROUPS.items() for category in categories]
+        payload = {'version': 1, 'stores': [{'code': str(i), 'name': 'S' * 160, 'active': True, 'memberships': links} for i in range(10000)]}
+        raw = json.dumps(payload).encode()
+        self.assertGreater(len(raw), 5_000_000)
+        self.assertLess(len(raw), MAX_STORE_SNAPSHOT_BYTES)
+        client = CenterClient('http://center', 'test-key')
+        client.opener = SimpleNamespace(open=lambda *args, **kwargs: BytesIO(raw))
+        self.assertEqual(len(validate_snapshot(client.request('/api/v1/stores'))[1]), 10000)
+
     def test_explicit_delete_all_disables_stores_but_keeps_history(self):
         conn = Connection()
         with conn.db:

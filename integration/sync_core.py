@@ -5,6 +5,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler, ProxyHandler
 
+# A valid 10,000-Store dataset with names and all 15 memberships can exceed 5 MB.
+MAX_STORE_SNAPSHOT_BYTES = 25_000_000
+
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -35,8 +38,8 @@ class CenterClient:
         }, method='GET' if payload is None else 'POST')
         try:
             with self.opener.open(request, timeout=10) as response:
-                raw = response.read(5_000_001)
-                if len(raw) > 5_000_000:
+                raw = response.read(MAX_STORE_SNAPSHOT_BYTES + 1)
+                if len(raw) > MAX_STORE_SNAPSHOT_BYTES:
                     raise ValueError('Data Center response is too large')
                 return json.loads(raw)
         except HTTPError as error:

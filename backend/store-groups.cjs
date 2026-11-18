@@ -18,4 +18,9 @@ function mergeMemberships(existing, incoming) {
   const groups = new Set(incoming.map(item => item.group));
   return memberships([...(existing || []).filter(item => !groups.has(item.group)), ...incoming]);
 }
-module.exports = {storeGroups, memberships, mergeMemberships};
+function assertStoreCapacity(db, records) {
+  const codes = new Set(db.prepare('SELECT code FROM stores').all().map(store => store.code));
+  for (const store of records) codes.add(store.code);
+  if (codes.size > 10000) throw Object.assign(Error('ชุดข้อมูลต้องมี Store รวมไม่เกิน 10,000 รายการ เพื่อให้ทั้งสองโปรเจคซิงก์ได้'), {status: 422});
+}
+module.exports = {storeGroups, memberships, mergeMemberships, assertStoreCapacity};
