@@ -1,0 +1,8 @@
+node_modules
+.npm-cache
+.secrets
+.git
+.env
+data
+backups
+*.xlsx

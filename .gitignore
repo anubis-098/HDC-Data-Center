@@ -1,0 +1,17 @@
+node_modules/
+.npm-cache/
+.env
+data/
+*.sqlite*
+__pycache__/
+.secrets/
+backups/
+.env.*
+!.env.example
+dist/
+*.log
+*.key
+*.pem
+*.dump
+*.backup
+~$*

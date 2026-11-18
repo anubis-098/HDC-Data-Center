@@ -1,0 +1,37 @@
+# Apply AFTER the consumer's original compose.yaml. Existing databases/volumes stay intact.
+services:
+  frontend:
+    build:
+      context: ${HDC_DATA_CENTER_PATH:-D:/Code/HDC-Data-Center}/integration
+      dockerfile: Dockerfile.consumer-frontend
+      additional_contexts:
+        consumer_source: ${HDC_CONSUMER_FRONTEND:?Set path to consumer frontend}
+      args:
+        HDC_CONSUMER_TYPE: ${HDC_CONSUMER_TYPE:?Set consumer project type}
+  api:
+    environment:
+      PYTHONPATH: /app:/hdc-integration
+      HDC_DATA_CENTER_URL: http://hdc-data-center:8082
+      HDC_DATA_CENTER_API_KEY: ${HDC_DATA_CENTER_API_KEY:?Set the API key for this project}
+      HDC_DATA_CENTER_SYNC_SECONDS: ${HDC_DATA_CENTER_SYNC_SECONDS:-60}
+      HDC_ACCOUNT_MANAGEMENT_KEY_FILE: /run/hdc-account-management.key
+      HDC_PROJECT_ID: ${HDC_CONSUMER_TYPE}
+    volumes:
+      - type: bind
+        source: ${HDC_DATA_CENTER_PATH:-D:/Code/HDC-Data-Center}/integration
+        target: /hdc-integration
+        read_only: true
+      - type: bind
+        source: ${HDC_ACCOUNT_KEY_FILE:?Run Start-Integration.ps1 to configure account management}
+        target: /run/hdc-account-management.key
+        read_only: true
+    command: ["sh", "-c", "python -m app.migrate && exec uvicorn hdc_bridge:app --app-dir /hdc-integration --host 0.0.0.0 --port 8000"]
+    networks:
+      default:
+      hdc-master-data:
+        aliases:
+          - hdc-${HDC_CONSUMER_TYPE}-api
+networks:
+  hdc-master-data:
+    name: hdc-master-data
+    external: true

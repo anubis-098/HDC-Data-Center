@@ -1,0 +1,30 @@
+name: hdc-data-center
+services:
+  data-center:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8082}:8082"
+    environment:
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:8082}
+    volumes:
+      - hdc-data:/data
+      - ./.secrets:/run/hdc-secrets:ro
+    networks:
+      default:
+      hdc-master-data:
+        aliases:
+          - hdc-data-center
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8082/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+volumes:
+  hdc-data:
+networks:
+  hdc-master-data:
+    name: hdc-master-data
