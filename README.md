@@ -4,6 +4,8 @@
 
 ## เริ่มใช้งาน Docker Compose
 
+ก่อนเริ่ม ให้เตรียม Certificate และแก้ค่า HTTPS ใน `.env` ตาม [คู่มือ HTTPS](deployment/README.md) ส่วนการคัดลอก `.env.example` ด้านล่างใช้เฉพาะการติดตั้งใหม่ อย่าทับ `.env` เดิมของ Server
+
 ```powershell
 cd D:\Code\HDC-Data-Center
 Copy-Item .env.example .env
@@ -12,9 +14,9 @@ docker compose up --build -d
 docker compose exec data-center node backend/manage.cjs create-admin
 ```
 
-สร้าง username และรหัสผ่านอย่างน้อย 12 ตัว (ซ่อนการพิมพ์) ไม่มีรหัสผ่านเริ่มต้น เปิด http://localhost:8082 แล้วเข้าสู่ระบบ นำเข้า List Store.xlsx เลือกชีต ตรวจสอบ และยืนยัน ฐานเริ่มว่าง ไม่ได้นำเข้าตัวอย่างอัตโนมัติ
+สร้าง username และรหัสผ่านอย่างน้อย 12 ตัว (ซ่อนการพิมพ์) ไม่มีรหัสผ่านเริ่มต้น เปิด https://10.84.185.1:8082 แล้วเข้าสู่ระบบ นำเข้า List Store.xlsx เลือกชีต ตรวจสอบ และยืนยัน ฐานเริ่มว่าง ไม่ได้นำเข้าตัวอย่างอัตโนมัติ
 
-`docker compose down` เก็บข้อมูลเดิม ห้ามใช้ `down -v` หากต้องการเก็บฐาน ค่าเริ่มต้น bind เฉพาะ localhost หากใช้ผ่าน LAN ให้ตั้ง BIND_ADDRESS และ PUBLIC_ORIGIN ให้ตรง URL ผู้ใช้ เช่น http://192.168.1.10:8082 ถ้าใช้ HTTPS ผ่าน reverse proxy ให้ตั้ง COOKIE_SECURE=true และ PUBLIC_ORIGIN เป็น https://your-domain
+`docker compose down` เก็บข้อมูลเดิม ห้ามใช้ `down -v` หากต้องการเก็บฐาน ค่าเริ่มต้น bind เฉพาะ localhost หากใช้ผ่าน LAN ให้ตั้ง `BIND_ADDRESS=0.0.0.0`, `PUBLIC_ORIGIN=https://10.84.185.1:8082` และ `COOKIE_SECURE=true` ใน `.env`
 
 ## ข้อมูลและการนำเข้า
 

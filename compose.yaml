@@ -3,8 +3,6 @@ services:
   data-center:
     build: .
     restart: unless-stopped
-    ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8082}:8082"
     environment:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:8082}
@@ -20,6 +18,40 @@ services:
       - no-new-privileges:true
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:8082/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  https:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8082}:443"
+    volumes:
+      - type: bind
+        source: ./deployment/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HDC_TLS_DIRECTORY:-D:/HDC-Certificates}/hdc-server.crt
+        target: /etc/nginx/certs/hdc-server.crt
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${HDC_TLS_DIRECTORY:-D:/HDC-Certificates}/hdc-server.key
+        target: /etc/nginx/certs/hdc-server.key
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      data-center:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
       interval: 15s
       timeout: 5s
       retries: 5

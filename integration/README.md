@@ -5,7 +5,7 @@
 ## เริ่มใช้งาน
 
 1. ในโฟลเดอร์ Data Center รัน `docker compose up -d --build`
-2. เปิด http://localhost:8082 เข้าระบบ Administrator และนำเข้า Store ให้มีข้อมูลอย่างน้อย 1 รายการ
+2. เปิด https://10.84.185.1:8082 เข้าระบบ Administrator และนำเข้า Store ให้มีข้อมูลอย่างน้อย 1 รายการ
 3. ในเมนู “การเชื่อมต่อ API” สร้าง Key ของ Container Loading และ Tote Tracker เก็บแยกกัน Key แสดงครั้งเดียว การหมุน Key ยกเลิกตัวเดิม
 4. รันจาก PowerShell:
 
@@ -26,8 +26,8 @@ cd D:\Code\HDC-Data-Center
 
 ## ตรวจสอบ
 
-- Container Loading: http://localhost:8080 หน้า Store จะมีปุ่ม “ซิงก์ตอนนี้” และแสดงเวอร์ชัน / เวลาสำเร็จล่าสุด
-- Tote Tracker: http://localhost:8081 หน้า Admin แสดง Store จาก Data Center และคงการจัดการ Tote เดิม
+- Container Loading: https://10.84.185.1:8080 หน้า Store จะมีปุ่ม “ซิงก์ตอนนี้” และแสดงเวอร์ชัน / เวลาสำเร็จล่าสุด
+- Tote Tracker: https://10.84.185.1:8081 หน้า Admin แสดง Store จาก Data Center และคงการจัดการ Tote เดิม
 - Data Center หน้า API แสดงเวอร์ชันและจำนวน Store ที่ปลายทางยืนยันหลัง commit สำเร็จ รีเฟรชเพื่อดูสถานะล่าสุด
 - ทดลองแก้ชื่อหรือปิด Store ที่ Data Center รอไม่เกิน 60 วินาที หรือกดซิงก์ที่ปลายทาง งานใหม่จะใช้ชื่อ/สถานะล่าสุด ประวัติ Shipment และ Tote Event ไม่เปลี่ยนชื่อย้อนหลัง
 
@@ -76,3 +76,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\Start-Integra
 `npm test` ตรวจ Data Center API, acknowledgement, key rotation และ frontend patch ขณะทดสอบ Python client กับ HTTP จริงตั้ง environment HDC_TEST_PYTHON เป็น path ของ Python 3.12+
 
 `python -m unittest discover -s integration -p test_sync.py -v` ตรวจ snapshot, transaction rollback, history และการปฏิเสธข้อมูลผิด โดยใช้ SQLite จำลอง SQL สำหรับ unit tests ยังต้องทดสอบ deployment กับ PostgreSQL จริงใน Docker host
+
+
+HTTPS is now configured in the base Compose files. Complete the certificate and `.env` prerequisites in [HTTPS deployment](../deployment/README.md) before running the integration script. Internal Docker API URLs remain HTTP.
